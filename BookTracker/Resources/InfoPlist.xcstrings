@@ -1,0 +1,22 @@
+{
+  "sourceLanguage": "uk",
+  "strings": {
+    "Застосунку потрібен доступ до камери, щоб сканувати штрихкод книги для швидкого додавання в бібліотеку.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app needs camera access to scan a book's barcode for quick adding to your library."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосунку потрібен доступ до камери, щоб сканувати штрихкод книги для швидкого додавання в бібліотеку."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
