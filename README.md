@@ -78,3 +78,7 @@ BookTracker/
 BookTrackerWidget/   Home Screen widget extension
 BookTrackerTests/    Swift Testing unit tests
 ```
+
+## License
+
+[MIT](LICENSE)
