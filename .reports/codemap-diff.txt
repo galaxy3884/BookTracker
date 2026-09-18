@@ -1,0 +1,43 @@
+Codemap generation report — 2026-09-18
+
+Type: FIRST GENERATION (no prior docs/CODEMAPS or .reports/codemap-diff.txt existed).
+No diff to compute; all 5 codemaps written fresh, no approval gate triggered.
+
+Files scanned: 49 (.swift/.yml/.xcstrings, excluding DerivedData/.build)
+  BookTracker/App          1
+  BookTracker/DesignSystem 6  (incl. Localizable.xcstrings)
+  BookTracker/Models       5
+  BookTracker/Resources    1  (InfoPlist.xcstrings)
+  BookTracker/Services     9
+  BookTracker/ViewModels   7
+  BookTracker/Views        10
+  BookTrackerWidget        4
+  BookTrackerTests         6
+  project.yml              1
+
+Codemaps written:
+  docs/CODEMAPS/architecture.md   (~650 tokens)
+  docs/CODEMAPS/backend.md        (~800 tokens)  — Service/Repository layer (no HTTP backend)
+  docs/CODEMAPS/frontend.md       (~900 tokens)  — View tree, ViewModel ownership, state
+  docs/CODEMAPS/data.md           (~550 tokens)  — SwiftData models, no migrations yet
+  docs/CODEMAPS/dependencies.md   (~500 tokens)  — Apple frameworks only, zero 3rd-party
+
+Architecture notes captured:
+  - MVVM + protocol-oriented Services/Repositories, DI via initializers (no container/singleton).
+  - App + WidgetExtension share code by listing the same source paths (Models/, DesignSystem/)
+    in both targets' project.yml `sources`, and share data via App Group SQLite store.
+  - Single `.sheet(item:)` with an enum (LibrarySheet) — a deliberate pattern to avoid a
+    known SwiftUI bug with multiple `.sheet(isPresented:)` modifiers (documented in-code).
+  - isOwned (Book model) added in Phase 6 as a defaulted stored property — no explicit
+    SchemaMigrationPlan; SwiftData handled it as a lightweight migration.
+  - Full localization (Phase 8): String Catalog with uk source language, en translation,
+    plural variants for the one count-dependent string (widget accessibility label).
+
+Dependencies detected: none new (still zero network / zero third-party, as constrained
+by every phase's brief). Apple frameworks: SwiftUI, SwiftData, WidgetKit, VisionKit,
+Swift Charts, Foundation localization APIs.
+
+Staleness warnings: none (first run — nothing to compare against).
+
+Next run: diff against this baseline; flag if any codemap changes >30% of its content
+before overwriting.
