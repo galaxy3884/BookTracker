@@ -83,7 +83,9 @@ final class JSONLibraryImportService: LibraryImportService {
     private func fingerprint(title: String, author: String, isbn: String?) -> Fingerprint {
         Fingerprint(
             isbn: isbn.flatMap(ISBN.canonical),
-            titleAuthor: "\(title)|\(author)".trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            titleAuthor: [title, author]
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+                .joined(separator: "|")
         )
     }
 
