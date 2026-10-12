@@ -1,7 +1,12 @@
 import SwiftUI
 
 struct BookDetailView: View {
+    private enum Field: Hashable {
+        case currentPage, totalPages, genre, notes, quoteText, quotePage
+    }
+
     @State private var viewModel: BookDetailViewModel
+    @FocusState private var focusedField: Field?
 
     init(book: Book, repository: BookRepository, quoteRepository: QuoteRepository) {
         _viewModel = State(initialValue: BookDetailViewModel(book: book, repository: repository, quoteRepository: quoteRepository))
@@ -26,6 +31,20 @@ struct BookDetailView: View {
         .animation(.default, value: viewModel.book.status)
         .navigationTitle(viewModel.book.title)
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: focusedField) { _, _ in
+            viewModel.commitPendingEdits()
+        }
+        .onDisappear {
+            viewModel.commitPendingEdits()
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(Strings.Common.done) {
+                    focusedField = nil
+                }
+            }
+        }
         .alert(Strings.Common.error, isPresented: errorBinding) {
             Button(Strings.Common.ok, role: .cancel) {}
         } message: {
@@ -83,9 +102,6 @@ struct BookDetailView: View {
             if let dateFinished = viewModel.book.dateFinished {
                 LabeledContent(Strings.BookDetail.finishedLabel, value: dateFinished.formatted(date: .abbreviated, time: .omitted))
             }
-            if let notes = viewModel.book.notes, !notes.isEmpty {
-                LabeledContent(Strings.BookDetail.notesLabel, value: notes)
-            }
         }
     }
 
@@ -120,31 +136,23 @@ struct BookDetailView: View {
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
                     .frame(minWidth: 44, maxWidth: 100)
-                    .onChange(of: viewModel.currentPageInput) { _, _ in
-                        viewModel.commitCurrentPage()
-                    }
+                    .focused($focusedField, equals: .currentPage)
             }
-            if let totalPages = viewModel.book.totalPages {
-                LabeledContent(Strings.BookDetail.totalPagesLabel, value: "\(totalPages)")
-                if let currentPage = viewModel.book.currentPage, totalPages > 0 {
-                    ProgressView(value: Double(currentPage), total: Double(totalPages))
-                        .tint(viewModel.book.status.color)
-                    Text("\(Int((Double(currentPage) / Double(totalPages) * 100).rounded()))%")
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                HStack {
-                    Text(Strings.BookDetail.totalPagesLabel)
-                    Spacer()
-                    TextField(Strings.BookDetail.totalPagesPlaceholder, text: $viewModel.totalPagesInput)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(minWidth: 44, maxWidth: 120)
-                        .onChange(of: viewModel.totalPagesInput) { _, _ in
-                            viewModel.commitTotalPages()
-                        }
-                }
+            HStack {
+                Text(Strings.BookDetail.totalPagesLabel)
+                Spacer()
+                TextField(Strings.BookDetail.totalPagesPlaceholder, text: $viewModel.totalPagesInput)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(minWidth: 44, maxWidth: 120)
+                    .focused($focusedField, equals: .totalPages)
+            }
+            if let progress = viewModel.book.progressFraction {
+                ProgressView(value: progress)
+                    .tint(viewModel.book.status.color)
+                Text("\(Int((progress * 100).rounded()))%")
+                    .font(.appCaption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -152,9 +160,7 @@ struct BookDetailView: View {
     private var detailsSection: some View {
         Section(Strings.BookDetail.detailsSection) {
             TextField(Strings.BookDetail.genrePlaceholder, text: $viewModel.genreInput)
-                .onChange(of: viewModel.genreInput) { _, _ in
-                    viewModel.commitGenre()
-                }
+                .focused($focusedField, equals: .genre)
             Picker(Strings.BookDetail.moodLabel, selection: $viewModel.mood) {
                 Text(Strings.Common.notSpecified).tag(Mood?.none)
                 ForEach(Mood.allCases) { mood in
@@ -173,6 +179,9 @@ struct BookDetailView: View {
             .onChange(of: viewModel.pace) { _, _ in
                 viewModel.commitPace()
             }
+            TextField(Strings.BookDetail.notesLabel, text: $viewModel.notesInput, axis: .vertical)
+                .lineLimit(2...6)
+                .focused($focusedField, equals: .notes)
         }
     }
 
@@ -201,8 +210,10 @@ struct BookDetailView: View {
             }
             VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                 TextField(Strings.BookDetail.newQuotePlaceholder, text: $viewModel.newQuoteText, axis: .vertical)
+                    .focused($focusedField, equals: .quoteText)
                 TextField(Strings.BookDetail.newQuotePagePlaceholder, text: $viewModel.newQuotePageInput)
                     .keyboardType(.numberPad)
+                    .focused($focusedField, equals: .quotePage)
                 Button(Strings.BookDetail.addQuoteAction) {
                     viewModel.addQuote()
                 }

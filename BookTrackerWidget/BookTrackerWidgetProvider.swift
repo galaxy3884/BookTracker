@@ -32,25 +32,28 @@ struct BookTrackerWidgetProvider: TimelineProvider {
     }
 
     private func currentEntry() -> BookTrackerWidgetEntry {
-        let container = SharedModelContainer.make()
-        let context = ModelContext(container)
-        let books = (try? context.fetch(FetchDescriptor<Book>())) ?? []
+        // If the shared store can't be opened, show an empty widget rather than a different database.
+        let container = try? SharedModelContainer.make()
+        let context = container.map { ModelContext($0) }
+        return withExtendedLifetime((container, context)) {
+            let books = (try? context?.fetch(FetchDescriptor<Book>())) ?? []
 
-        let calendar = Calendar.current
-        let now = Date.now
-        let finishedThisMonth = books.filter { book in
-            book.status == .finished
-                && book.dateFinished.map { calendar.isDate($0, equalTo: now, toGranularity: .month) } == true
-        }.count
+            let calendar = Calendar.current
+            let now = Date.now
+            let finishedThisMonth = books.filter { book in
+                book.status == .finished
+                    && book.dateFinished.map { calendar.isDate($0, equalTo: now, toGranularity: .month) } == true
+            }.count
 
-        let readingBook = books.first { $0.status == .reading }
+            let readingBook = Book.currentlyReading(in: books)
 
-        return BookTrackerWidgetEntry(
-            date: now,
-            booksFinishedThisMonth: finishedThisMonth,
-            currentlyReadingTitle: readingBook?.title,
-            currentlyReadingAuthor: readingBook?.author,
-            currentlyReadingCoverData: readingBook?.coverImageData
-        )
+            return BookTrackerWidgetEntry(
+                date: now,
+                booksFinishedThisMonth: finishedThisMonth,
+                currentlyReadingTitle: readingBook?.title,
+                currentlyReadingAuthor: readingBook?.author,
+                currentlyReadingCoverData: readingBook?.coverImageData
+            )
+        }
     }
 }

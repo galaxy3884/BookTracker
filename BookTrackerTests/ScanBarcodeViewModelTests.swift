@@ -77,9 +77,9 @@ struct ScanBarcodeViewModelTests {
         }
         _ = viewModel.makeScannerViewController()
 
-        mock.simulateRecognition(.isbn("9781234567890"))
+        mock.simulateRecognition(.isbn("9780306406157"))
 
-        #expect(recognizedISBN == "9781234567890")
+        #expect(recognizedISBN == "9780306406157")
     }
 
     @Test("recognizing an unsupported barcode sets a user-facing message instead of crashing")
@@ -92,6 +92,21 @@ struct ScanBarcodeViewModelTests {
         _ = viewModel.makeScannerViewController()
 
         mock.simulateRecognition(.unsupportedCode)
+
+        #expect(viewModel.unsupportedCodeMessage != nil)
+        #expect(recognizedISBN == nil)
+    }
+
+    @Test("a scanned EAN-13 that isn't a valid ISBN is rejected with a message")
+    func recognizingNonISBNBarcode() {
+        let mock = MockBarcodeScanningService()
+        var recognizedISBN: String?
+        let viewModel = ScanBarcodeViewModel(scanningService: mock) { isbn in
+            recognizedISBN = isbn
+        }
+        _ = viewModel.makeScannerViewController()
+
+        mock.simulateRecognition(.isbn("4006381333931"))
 
         #expect(viewModel.unsupportedCodeMessage != nil)
         #expect(recognizedISBN == nil)
@@ -122,17 +137,33 @@ struct ScanBarcodeViewModelTests {
         #expect(recognizedISBN == nil)
     }
 
-    @Test("submitting a manual ISBN trims whitespace and forwards it")
+    @Test("submitting an invalid manual ISBN shows an error and forwards nothing")
+    func submitInvalidManualISBN() {
+        let mock = MockBarcodeScanningService()
+        var recognizedISBN: String?
+        let viewModel = ScanBarcodeViewModel(scanningService: mock) { isbn in
+            recognizedISBN = isbn
+        }
+        viewModel.manualISBN = "978123"
+
+        viewModel.submitManualISBN()
+
+        #expect(recognizedISBN == nil)
+        #expect(viewModel.manualISBNError != nil)
+    }
+
+    @Test("submitting a manual ISBN normalises it to a canonical ISBN-13")
     func submitManualISBN() {
         let mock = MockBarcodeScanningService()
         var recognizedISBN: String?
         let viewModel = ScanBarcodeViewModel(scanningService: mock) { isbn in
             recognizedISBN = isbn
         }
-        viewModel.manualISBN = "  978123  "
+        viewModel.manualISBN = "  0-306-40615-2  "
 
         viewModel.submitManualISBN()
 
-        #expect(recognizedISBN == "978123")
+        #expect(recognizedISBN == "9780306406157")
+        #expect(viewModel.manualISBNError == nil)
     }
 }

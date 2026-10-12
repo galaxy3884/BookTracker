@@ -14,6 +14,7 @@ struct ExportedBook: Codable {
     let genre: String?
     let mood: String?
     let pace: String?
+    let isOwned: Bool
     let dateAdded: Date
     let dateStarted: Date?
     let dateFinished: Date?
@@ -21,6 +22,15 @@ struct ExportedBook: Codable {
     let totalPages: Int?
     let notes: String?
     let quotes: [ExportedQuote]
+}
+
+/// Backup file format. Cover images are deliberately not exported (the app never stores real covers).
+struct ExportedLibrary: Codable {
+    static let currentVersion = 1
+
+    let version: Int
+    let exportedAt: Date
+    let books: [ExportedBook]
 }
 
 protocol LibraryExportService {
@@ -38,6 +48,7 @@ final class JSONLibraryExportService: LibraryExportService {
                 genre: book.genre,
                 mood: book.mood?.rawValue,
                 pace: book.pace?.rawValue,
+                isOwned: book.isOwned,
                 dateAdded: book.dateAdded,
                 dateStarted: book.dateStarted,
                 dateFinished: book.dateFinished,
@@ -47,11 +58,12 @@ final class JSONLibraryExportService: LibraryExportService {
                 quotes: book.quotes.map { ExportedQuote(text: $0.text, page: $0.page, dateAdded: $0.dateAdded) }
             )
         }
+        let library = ExportedLibrary(version: ExportedLibrary.currentVersion, exportedAt: .now, books: exportedBooks)
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(exportedBooks)
+        let data = try encoder.encode(library)
 
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("book-tracker-export-\(Int(Date.now.timeIntervalSince1970))")

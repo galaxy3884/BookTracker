@@ -61,9 +61,6 @@ struct BookRowView: View {
     }
 
     private var progress: Double? {
-        guard book.status == .reading, let currentPage = book.currentPage, let totalPages = book.totalPages, totalPages > 0 else {
-            return nil
-        }
-        return Double(currentPage) / Double(totalPages)
+        book.status == .reading ? book.progressFraction : nil
     }
 }

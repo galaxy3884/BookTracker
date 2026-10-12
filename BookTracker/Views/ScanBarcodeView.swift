@@ -109,11 +109,17 @@ struct ScanBarcodeView: View {
         Form {
             Section {
                 TextField(Strings.ScanBarcode.isbnFieldPlaceholder, text: $viewModel.manualISBN)
-                    .keyboardType(.numberPad)
+                    .keyboardType(.asciiCapable)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
             } header: {
                 Text(Strings.ScanBarcode.manualEntryHeader)
             } footer: {
-                Text(Strings.ScanBarcode.manualEntryFooter)
+                if let manualISBNError = viewModel.manualISBNError {
+                    Text(manualISBNError).foregroundStyle(.red)
+                } else {
+                    Text(Strings.ScanBarcode.manualEntryFooter)
+                }
             }
             Section {
                 Button(Strings.ScanBarcode.continueAction) {

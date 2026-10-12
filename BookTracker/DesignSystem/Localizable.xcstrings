@@ -65,6 +65,38 @@
         }
       }
     },
+    "Імпорт завершено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import complete"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Імпорт завершено"
+          }
+        }
+      }
+    },
+    "Імпортувати бібліотеку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import library"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Імпортувати бібліотеку"
+          }
+        }
+      }
+    },
     "Інформація": {
       "localizations": {
         "en": {
@@ -145,6 +177,22 @@
         }
       }
     },
+    "Введіть коректний ISBN (10 або 13 цифр з правильною контрольною цифрою).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a valid ISBN (10 or 13 digits with a valid check digit)."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть коректний ISBN (10 або 13 цифр з правильною контрольною цифрою)."
+          }
+        }
+      }
+    },
     "Ввести ISBN вручну": {
       "localizations": {
         "en": {
@@ -173,6 +221,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ввести вручну"
+          }
+        }
+      }
+    },
+    "Все одно додати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add anyway"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все одно додати"
           }
         }
       }
@@ -353,6 +417,22 @@
         }
       }
     },
+    "Додано: %lld · Пропущено: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added: %lld · Skipped: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додано: %lld · Пропущено: %lld"
+          }
+        }
+      }
+    },
     "Додати книгу": {
       "localizations": {
         "en": {
@@ -397,6 +477,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Додати цитату"
+          }
+        }
+      }
+    },
+    "Додає книги з JSON-файлу, створеного експортом. Книги, що вже є в бібліотеці, пропускаються.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds books from a JSON file created by Export. Books already in your library are skipped."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додає книги з JSON-файлу, створеного експортом. Книги, що вже є в бібліотеці, пропускаються."
           }
         }
       }
@@ -625,6 +721,22 @@
         }
       }
     },
+    "Кількість сторінок має бути більшою за нуль.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total pages must be greater than zero."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кількість сторінок має бути більшою за нуль."
+          }
+        }
+      }
+    },
     "Легкий": {
       "localizations": {
         "en": {
@@ -765,6 +877,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Настрій"
+          }
+        }
+      }
+    },
+    "Не вдалося відкрити бібліотеку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't open your library"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося відкрити бібліотеку"
+          }
+        }
+      }
+    },
+    "Не вдалося прочитати файл: це не резервна копія BookTracker.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't read the file: it isn't a BookTracker backup."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося прочитати файл: це не резервна копія BookTracker."
           }
         }
       }
@@ -1021,6 +1165,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Поточна сторінка"
+          }
+        }
+      }
+    },
+    "Поточна сторінка не може бути більшою за загальну кількість сторінок.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current page can't exceed the total number of pages."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поточна сторінка не може бути більшою за загальну кількість сторінок."
+          }
+        }
+      }
+    },
+    "Поточна сторінка не може бути від'ємною.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current page can't be negative."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поточна сторінка не може бути від'ємною."
           }
         }
       }
@@ -1333,6 +1509,22 @@
         }
       }
     },
+    "Спільне сховище (App Group) не налаштоване.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The shared storage (App Group) isn't configured."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спільне сховище (App Group) не налаштоване."
+          }
+        }
+      }
+    },
     "Статистика": {
       "localizations": {
         "en": {
@@ -1429,6 +1621,38 @@
         }
       }
     },
+    "Сховище даних недоступне. Спробуйте перезапустити застосунок.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The data store is unavailable. Try restarting the app."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сховище даних недоступне. Спробуйте перезапустити застосунок."
+          }
+        }
+      }
+    },
+    "Така книга вже є": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book is already in your library"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Така книга вже є"
+          }
+        }
+      }
+    },
     "Текст цитати": {
       "localizations": {
         "en": {
@@ -1493,6 +1717,22 @@
         }
       }
     },
+    "У бібліотеці вже є книга з таким ISBN: «%@».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your library already has a book with this ISBN: “%@”."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У бібліотеці вже є книга з таким ISBN: «%@»."
+          }
+        }
+      }
+    },
     "Усього сторінок": {
       "localizations": {
         "en": {
@@ -1505,6 +1745,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Усього сторінок"
+          }
+        }
+      }
+    },
+    "Файл створено новішою версією застосунку.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file was created by a newer version of the app."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл створено новішою версією застосунку."
           }
         }
       }

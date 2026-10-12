@@ -15,6 +15,20 @@ struct StatisticsView: View {
     private var paceData: [PaceCount] { viewModel.paceData }
     private var monthlyData: [MonthlyCount] { viewModel.monthlyData }
 
+    /// Changes whenever any field the statistics depend on changes (not just the book count).
+    private var refreshKey: Int {
+        var hasher = Hasher()
+        for book in books {
+            hasher.combine(book.id)
+            hasher.combine(book.statusRawValue)
+            hasher.combine(book.genre)
+            hasher.combine(book.mood)
+            hasher.combine(book.pace)
+            hasher.combine(book.dateFinished)
+        }
+        return hasher.finalize()
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -27,8 +41,8 @@ struct StatisticsView: View {
                 .padding()
             }
             .navigationTitle(Strings.Statistics.title)
-            .task(id: books.count) {
-                await viewModel.refresh(books: books)
+            .onChange(of: refreshKey, initial: true) {
+                viewModel.refresh(books: books)
             }
         }
     }

@@ -18,6 +18,7 @@ final class ScanBarcodeViewModel {
     var state: ScanBarcodeState
     var manualISBN: String = ""
     var unsupportedCodeMessage: String?
+    var manualISBNError: String?
 
     init(scanningService: BarcodeScanningService, onISBNRecognized: @escaping (String) -> Void) {
         self.scanningService = scanningService
@@ -49,7 +50,12 @@ final class ScanBarcodeViewModel {
     func submitManualISBN() {
         let trimmed = manualISBN.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        onISBNRecognized(trimmed)
+        guard let isbn = ISBN.canonical(trimmed) else {
+            manualISBNError = Strings.Validation.invalidISBN
+            return
+        }
+        manualISBNError = nil
+        onISBNRecognized(isbn)
     }
 
     func makeScannerViewController() -> UIViewController {
@@ -60,8 +66,12 @@ final class ScanBarcodeViewModel {
 
     private func handle(_ outcome: BarcodeScanOutcome) {
         switch outcome {
-        case .isbn(let isbn):
-            onISBNRecognized(isbn)
+        case .isbn(let payload):
+            if let isbn = ISBN.canonical(payload) {
+                onISBNRecognized(isbn)
+            } else {
+                unsupportedCodeMessage = Strings.ScanBarcode.unsupportedCodeMessage
+            }
         case .unsupportedCode:
             unsupportedCodeMessage = Strings.ScanBarcode.unsupportedCodeMessage
         case .scanningUnavailable:

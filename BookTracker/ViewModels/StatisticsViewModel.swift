@@ -13,15 +13,12 @@ final class StatisticsViewModel {
         self.statisticsService = statisticsService
     }
 
-    /// Recomputes all four aggregations, yielding between each so a large
-    /// library doesn't block the UI in one long synchronous stretch.
-    func refresh(books: [Book]) async {
+    /// Recomputes all four aggregations. They are cheap, in-memory passes over `Book` objects
+    /// (which are bound to the main actor), so this stays synchronous.
+    func refresh(books: [Book]) {
         genreData = statisticsService.genreDistribution(for: books)
-        await Task.yield()
         moodData = statisticsService.moodDistribution(for: books)
-        await Task.yield()
         paceData = statisticsService.paceDistribution(for: books)
-        await Task.yield()
         monthlyData = statisticsService.monthlyFinishedCounts(for: books)
     }
 }

@@ -78,6 +78,37 @@ enum Strings {
         static let isbnPlaceholder = String(localized: "ISBN (опційно)")
         static let statusSection = String(localized: "Статус")
         static let ownedToggle = String(localized: "Куплена")
+        static let duplicateTitle = String(localized: "Така книга вже є")
+        static let addAnywayAction = String(localized: "Все одно додати")
+
+        static func duplicateMessage(_ title: String) -> String {
+            String(localized: "У бібліотеці вже є книга з таким ISBN: «\(title)».")
+        }
+    }
+
+    enum Validation {
+        static let negativePage = String(localized: "Поточна сторінка не може бути від'ємною.")
+        static let nonPositiveTotalPages = String(localized: "Кількість сторінок має бути більшою за нуль.")
+        static let currentPageExceedsTotal = String(localized: "Поточна сторінка не може бути більшою за загальну кількість сторінок.")
+        static let invalidISBN = String(localized: "Введіть коректний ISBN (10 або 13 цифр з правильною контрольною цифрою).")
+    }
+
+    enum Store {
+        static let appGroupUnavailable = String(localized: "Спільне сховище (App Group) не налаштоване.")
+        static let unavailableTitle = String(localized: "Не вдалося відкрити бібліотеку")
+        static let unavailableMessage = String(localized: "Сховище даних недоступне. Спробуйте перезапустити застосунок.")
+    }
+
+    enum Import {
+        static let action = String(localized: "Імпортувати бібліотеку")
+        static let footer = String(localized: "Додає книги з JSON-файлу, створеного експортом. Книги, що вже є в бібліотеці, пропускаються.")
+        static let resultTitle = String(localized: "Імпорт завершено")
+        static let notABackup = String(localized: "Не вдалося прочитати файл: це не резервна копія BookTracker.")
+        static let newerVersion = String(localized: "Файл створено новішою версією застосунку.")
+
+        static func result(added: Int, skipped: Int) -> String {
+            String(localized: "Додано: \(added) · Пропущено: \(skipped)")
+        }
     }
 
     enum ScanBarcode {

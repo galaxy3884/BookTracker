@@ -11,11 +11,19 @@ struct AddBookView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(Strings.AddBook.dataSection) {
+                Section {
                     TextField(Strings.AddBook.titlePlaceholder, text: $viewModel.title)
                     TextField(Strings.AddBook.authorPlaceholder, text: $viewModel.author)
                     TextField(Strings.AddBook.isbnPlaceholder, text: $viewModel.isbn)
-                        .keyboardType(.numberPad)
+                        .keyboardType(.asciiCapable)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                } header: {
+                    Text(Strings.AddBook.dataSection)
+                } footer: {
+                    if let isbnError = viewModel.isbnError {
+                        Text(isbnError).foregroundStyle(.red)
+                    }
                 }
                 Section(Strings.AddBook.statusSection) {
                     statusPicker
@@ -44,7 +52,24 @@ struct AddBookView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
+            .alert(Strings.AddBook.duplicateTitle, isPresented: duplicateBinding) {
+                Button(Strings.AddBook.addAnywayAction) {
+                    if viewModel.save(allowDuplicate: true) {
+                        dismiss()
+                    }
+                }
+                Button(Strings.Common.cancel, role: .cancel) {}
+            } message: {
+                Text(Strings.AddBook.duplicateMessage(viewModel.duplicateBookTitle ?? ""))
+            }
         }
+    }
+
+    private var duplicateBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.duplicateBookTitle != nil },
+            set: { isPresented in if !isPresented { viewModel.duplicateBookTitle = nil } }
+        )
     }
 
     private var statusPicker: some View {

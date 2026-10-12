@@ -152,4 +152,148 @@ struct SwiftDataBookRepositoryTests {
         let remaining = try context.fetch(FetchDescriptor<Book>())
         #expect(remaining.isEmpty)
     }
+
+    // MARK: dates on creation and status changes
+
+    @Test("addBook as finished stamps both dates so the book counts in statistics")
+    func addFinishedBookStampsDates() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+
+        try repository.addBook(title: "Done", author: "A", status: .finished, isbn: nil, isOwned: false)
+
+        let book = try #require(try context.fetch(FetchDescriptor<Book>()).first)
+        #expect(book.dateStarted != nil)
+        #expect(book.dateFinished != nil)
+    }
+
+    @Test("re-selecting finished does not move dateFinished")
+    func reselectFinishedKeepsDate() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        let original = Date(timeIntervalSince1970: 1_000)
+        let book = Book(title: "T", author: "A", status: .finished, dateStarted: original, dateFinished: original)
+        context.insert(book)
+
+        try repository.updateStatus(of: book, to: .finished)
+
+        #expect(book.dateFinished == original)
+    }
+
+    @Test("finished → wantToRead clears the finish date")
+    func finishedToWantToReadClearsDate() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        let book = Book(title: "T", author: "A", status: .finished, dateStarted: .now, dateFinished: .now)
+        context.insert(book)
+
+        try repository.updateStatus(of: book, to: .wantToRead)
+
+        #expect(book.dateFinished == nil)
+    }
+
+    // MARK: page validation
+
+    @Test("updateProgress accepts a consistent pair")
+    func updateProgressValid() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        let book = Book(title: "T", author: "A", status: .reading)
+        context.insert(book)
+
+        try repository.updateProgress(of: book, currentPage: 300, totalPages: 300)
+
+        #expect(book.currentPage == 300)
+    }
+
+    @Test(
+        "updateProgress rejects invalid pages and leaves the book untouched",
+        arguments: [
+            (-1, 100, BookValidationError.negativePage),
+            (10, 0, BookValidationError.nonPositiveTotalPages),
+            (10, -5, BookValidationError.nonPositiveTotalPages),
+            (101, 100, BookValidationError.currentPageExceedsTotal)
+        ]
+    )
+    func updateProgressInvalid(current: Int, total: Int, expected: BookValidationError) throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        let book = Book(title: "T", author: "A", status: .reading, currentPage: 5, totalPages: 50)
+        context.insert(book)
+
+        #expect(throws: expected) {
+            try repository.updateProgress(of: book, currentPage: current, totalPages: total)
+        }
+        #expect(book.currentPage == 5)
+        #expect(book.totalPages == 50)
+    }
+
+    // MARK: ISBN
+
+    @Test("addBook stores the canonical ISBN-13")
+    func addBookCanonicalISBN() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+
+        try repository.addBook(title: "T", author: "A", status: .wantToRead, isbn: "0-306-40615-2", isOwned: false)
+
+        let book = try #require(try context.fetch(FetchDescriptor<Book>()).first)
+        #expect(book.isbn == "9780306406157")
+    }
+
+    @Test("addBook rejects an invalid ISBN and stores nothing")
+    func addBookInvalidISBN() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+
+        #expect(throws: BookValidationError.invalidISBN) {
+            try repository.addBook(title: "T", author: "A", status: .wantToRead, isbn: "123", isOwned: false)
+        }
+        #expect(try context.fetch(FetchDescriptor<Book>()).isEmpty)
+    }
+
+    @Test("findBook matches the same ISBN written as ISBN-10 or ISBN-13")
+    func findBookByISBN() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        try repository.addBook(title: "Known", author: "A", status: .wantToRead, isbn: "9780306406157", isOwned: false)
+        try repository.addBook(title: "No ISBN", author: "A", status: .wantToRead, isbn: nil, isOwned: false)
+
+        #expect(try repository.findBook(withISBN: "0306406152")?.title == "Known")
+        #expect(try repository.findBook(withISBN: "978-0-306-40615-7")?.title == "Known")
+        #expect(try repository.findBook(withISBN: "9780804429573") == nil)
+    }
+
+    // MARK: notes and widget refresh
+
+    @Test("updateNotes stores and clears notes")
+    func updateNotes() throws {
+        let context = try makeContext()
+        let repository = SwiftDataBookRepository(modelContext: context)
+        let book = Book(title: "T", author: "A", status: .reading)
+        context.insert(book)
+
+        try repository.updateNotes(of: book, notes: "Great start")
+        #expect(book.notes == "Great start")
+
+        try repository.updateNotes(of: book, notes: nil)
+        #expect(book.notes == nil)
+    }
+
+    @Test("every successful mutation asks the widget to refresh; a rejected one does not")
+    func widgetRefreshOnMutations() throws {
+        let context = try makeContext()
+        var refreshCount = 0
+        let repository = SwiftDataBookRepository(modelContext: context, onDataChanged: { refreshCount += 1 })
+
+        try repository.addBook(title: "T", author: "A", status: .reading, isbn: nil, isOwned: false)
+        let book = try #require(try context.fetch(FetchDescriptor<Book>()).first)
+        try repository.updateStatus(of: book, to: .finished)
+        try repository.updateOwnership(of: book, isOwned: true)
+        try repository.delete(book)
+        #expect(refreshCount == 4)
+
+        _ = try? repository.updateProgress(of: Book(title: "X", author: "A", status: .reading), currentPage: -1, totalPages: nil)
+        #expect(refreshCount == 4)
+    }
 }

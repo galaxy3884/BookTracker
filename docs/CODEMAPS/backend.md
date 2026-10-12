@@ -10,12 +10,17 @@ Implementation: `SwiftDataBookRepository` (Services/SwiftDataBookRepository.swif
 
 | Method | Called from | Notable side effects |
 |---|---|---|
-| `addBook(title:author:status:isbn:isOwned:)` | AddBookViewModel.save() | sets `dateStarted` if status == .reading |
-| `updateStatus(of:to:)` | BookDetailViewModel.changeStatus() | reading→sets dateStarted (once); finished→sets dateFinished; leaving finished clears dateFinished |
-| `updateProgress(of:currentPage:totalPages:)` | BookDetailViewModel.commitCurrentPage/commitTotalPages() | plain field write + save |
-| `updateMetadata(of:genre:mood:pace:)` | BookDetailViewModel.commitGenre/commitMood/commitPace() | plain field write + save |
+| `addBook(title:author:status:isbn:isOwned:)` | AddBookViewModel.save() | stores canonical ISBN-13 (throws `.invalidISBN`); dates via `Book.applyDatesForCurrentStatus()` (finished ⇒ both dates set) |
+| `findBook(withISBN:)` | AddBookViewModel.save() | matches ISBN-10/13 spellings via `ISBN.canonical`; duplicate ⇒ user confirms |
+| `updateStatus(of:to:)` | BookDetailViewModel.changeStatus() | delegates to `Book.transition(to:)` (Models/Book+Rules.swift): same status = no-op; →reading: keeps/sets dateStarted, clears dateFinished; →finished: dateStarted kept-or-now, dateFinished = now; →wantToRead/didNotFinish: dateFinished cleared, dateStarted kept |
+| `updateProgress(of:currentPage:totalPages:)` | BookDetailViewModel.commitPendingEdits() | validates (current ≥ 0, total > 0, current ≤ total) else throws `BookValidationError` |
+| `updateMetadata(of:genre:mood:pace:)` | BookDetailViewModel.commitPendingEdits/commitMood/commitPace() | plain field write + save |
+| `updateNotes(of:notes:)` | BookDetailViewModel.commitPendingEdits() | plain field write + save |
 | `updateOwnership(of:isOwned:)` | BookDetailViewModel.commitIsOwned() | plain field write + save |
 | `delete(_:)` | LibraryViewModel.delete() | `modelContext.delete` + save |
+
+Every successful mutation calls `onDataChanged` (default `WidgetRefresher.reload` →
+`WidgetCenter.reloadTimelines(ofKind: AppWidget.kind)`), so the widget updates immediately.
 
 ## QuoteRepository (protocol, Services/QuoteRepository.swift)
 Implementation: `SwiftDataQuoteRepository` (Services/SwiftDataQuoteRepository.swift)
@@ -50,11 +55,22 @@ Implementation: `DataScannerBarcodeScanningService` (VisionKit `DataScannerViewC
 `makeScannerViewController(onRecognize:)` → `BarcodeScanOutcome` (.isbn / .unsupportedCode /
 .scanningUnavailable). Called from `ScanBarcodeViewModel`.
 
+## ISBN (Services/ISBN.swift) — pure
+`ISBN.canonical(_:)` strips spaces/hyphens, validates ISBN-10/13 checksums (13 must start 978/979),
+converts ISBN-10 → ISBN-13; everything is stored/compared as canonical ISBN-13. Used by
+AddBookViewModel (inline error), ScanBarcodeViewModel (scan + manual entry), repository.
+
+## Import (Services/LibraryImportService.swift)
+`JSONLibraryImportService.importLibrary(from:) -> ImportSummary(added, skipped)`: merge-only restore of an
+`ExportedLibrary` (versioned, `version <= currentVersion`); duplicates (same ISBN, else same
+title+author, case-insensitive) are skipped, never overwritten. Called from SettingsViewModel
+(`.fileImporter`). Export now includes `isOwned` and is wrapped as `{version, exportedAt, books}`.
+
 ## Persistence bootstrap
-`SharedModelContainer.make()` (Services/SharedModelContainer.swift) — one function,
-used by both the app (`BookTrackerApp.swift`) and the widget provider
-(`BookTrackerWidgetProvider.swift`). Schema = `[Book.self, Quote.self]`; stores in the
-App Group container when available, else a local default store.
+`SharedModelContainer.make() throws` (Services/SharedModelContainer.swift) — used by the app
+(`BookTrackerApp` shows `StoreUnavailableView` on failure instead of crashing) and the widget provider
+(empty widget on failure). Schema = `[Book.self, Quote.self]`; the App Group container is REQUIRED
+(no silent fallback to a private store, which would give app and widget different databases).
 
 ## Repository injection
 All repositories/services are constructed once in `MainTabView` from

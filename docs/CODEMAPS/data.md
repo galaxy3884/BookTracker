@@ -17,11 +17,12 @@ coverImageData Data?            — always nil in practice (offline app, no down
 statusRawValue String           — backing store; `status: BookStatus` computed get/set
 dateAdded     Date              = .now at creation
 dateStarted   Date?             — set once when status becomes .reading
-dateFinished  Date?             — set when status becomes .finished; cleared otherwise
+dateFinished  Date?             — set to .now when →.finished; cleared on any other status
+                                   (rules live in Book+Rules.swift: transition/applyDatesForCurrentStatus)
 currentPage   Int?
 totalPages    Int?
-notes         String?
-isbn          String?
+notes         String?           — edited in BookDetailView (multiline)
+isbn          String?           — canonical ISBN-13 (digits) when present
 genre         String?           — free user text, NOT localized
 mood          Mood?              (enum, see below)
 pace          Pace?              (enum, see below)

@@ -20,6 +20,7 @@ struct LibraryView: View {
     private let scanningService: BarcodeScanningService
     private let quoteRepository: QuoteRepository
     private let exportService: LibraryExportService
+    private let importService: LibraryImportService
 
     @Query(sort: \Book.dateAdded, order: .reverse) private var books: [Book]
     @State private var viewModel: LibraryViewModel
@@ -30,12 +31,14 @@ struct LibraryView: View {
         repository: BookRepository,
         scanningService: BarcodeScanningService,
         quoteRepository: QuoteRepository,
-        exportService: LibraryExportService
+        exportService: LibraryExportService,
+        importService: LibraryImportService
     ) {
         self.repository = repository
         self.scanningService = scanningService
         self.quoteRepository = quoteRepository
         self.exportService = exportService
+        self.importService = importService
         _viewModel = State(initialValue: LibraryViewModel(repository: repository))
     }
 
@@ -101,7 +104,7 @@ struct LibraryView: View {
                         activeSheet = nil
                     }
                 case .settings:
-                    SettingsView(exportService: exportService)
+                    SettingsView(exportService: exportService, importService: importService)
                 }
             }
             .alert(Strings.Common.error, isPresented: errorBinding) {

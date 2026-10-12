@@ -9,10 +9,23 @@ final class AddBookViewModel {
     var isbn: String
     var isOwned: Bool = false
     var errorMessage: String?
+    var duplicateBookTitle: String?
+
+    private var trimmedISBN: String {
+        isbn.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var isbnError: String? {
+        if trimmedISBN.isEmpty || ISBN.canonical(trimmedISBN) != nil {
+            return nil
+        }
+        return Strings.Validation.invalidISBN
+    }
 
     var canSave: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !author.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !author.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        isbnError == nil
     }
 
     init(repository: BookRepository, defaultStatus: BookStatus, prefilledISBN: String? = nil) {
@@ -21,11 +34,16 @@ final class AddBookViewModel {
         self.isbn = prefilledISBN ?? ""
     }
 
+    /// Returns `true` when the book was saved. If a book with the same ISBN already exists the
+    /// save is held back and `duplicateBookTitle` is set, so the user can confirm with `allowDuplicate`.
     @discardableResult
-    func save() -> Bool {
+    func save(allowDuplicate: Bool = false) -> Bool {
         guard canSave else { return false }
-        let trimmedISBN = isbn.trimmingCharacters(in: .whitespacesAndNewlines)
         do {
+            if !allowDuplicate, !trimmedISBN.isEmpty, let existing = try repository.findBook(withISBN: trimmedISBN) {
+                duplicateBookTitle = existing.title
+                return false
+            }
             try repository.addBook(
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 author: author.trimmingCharacters(in: .whitespacesAndNewlines),

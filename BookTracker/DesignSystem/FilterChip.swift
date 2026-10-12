@@ -23,6 +23,7 @@ struct FilterChip: View {
             .background(isSelected ? color : color.opacity(0.12), in: Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .animation(.default, value: isSelected)
     }
 }

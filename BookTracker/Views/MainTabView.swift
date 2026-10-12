@@ -13,7 +13,8 @@ struct MainTabView: View {
                 repository: repository,
                 scanningService: scanningService,
                 quoteRepository: quoteRepository,
-                exportService: exportService
+                exportService: exportService,
+                importService: importService
             )
             .tabItem {
                 Label(Strings.MainTab.library, systemImage: "books.vertical.fill")
@@ -28,6 +29,10 @@ struct MainTabView: View {
 
     private var repository: BookRepository {
         SwiftDataBookRepository(modelContext: modelContext)
+    }
+
+    private var importService: LibraryImportService {
+        JSONLibraryImportService(modelContext: modelContext)
     }
 
     private var quoteRepository: QuoteRepository {

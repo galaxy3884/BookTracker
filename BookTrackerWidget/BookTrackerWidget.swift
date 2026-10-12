@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 struct BookTrackerWidget: Widget {
-    let kind = "BookTrackerWidget"
+    let kind = AppWidget.kind
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BookTrackerWidgetProvider()) { entry in
