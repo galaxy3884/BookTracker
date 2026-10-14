@@ -2,6 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+**English** · [Українська](README.uk.md)
+
 A fully offline iOS book-tracking app. SwiftUI + SwiftData, no network requests,
 no third-party dependencies.
 
